@@ -1,5 +1,7 @@
 package asposetest;
 
+import java.net.URL;
+
 public interface Documento {
 
     Documento replace(String tag, String newText) throws Exception;
@@ -18,6 +20,10 @@ public interface Documento {
 
     static Documento create() throws Exception {
         return DocumentoFactory.create();
+    }
+
+    static Documento create(URL fullPath) throws Exception {
+        return create(fullPath.getPath());
     }
 
     static Documento create(String fullPath) throws Exception {
