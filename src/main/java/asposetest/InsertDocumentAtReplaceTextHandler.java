@@ -22,10 +22,10 @@ class InsertDocumentAtReplaceTextHandler implements IReplacingCallback {
         // Remove the paragraph with the match text.
         para.remove();
 
-        return ReplaceAction.REPLACE;
+        return ReplaceAction.SKIP;
     }
 
-    public static void insertDocument(Node insertAfterNode, Document srcDoc) throws Exception {
+    private static void insertDocument(Node insertAfterNode, Document srcDoc) {
         // Make sure that the node is either a paragraph or table.
         if ((insertAfterNode.getNodeType() != NodeType.PARAGRAPH) & (insertAfterNode.getNodeType() != NodeType.TABLE))
             throw new IllegalArgumentException("The destination node should be either a paragraph or table.");
@@ -43,15 +43,17 @@ class InsertDocumentAtReplaceTextHandler implements IReplacingCallback {
                 // Let's skip the node if it is a last empty paragraph in a section.
                 if (srcNode.getNodeType() == (NodeType.PARAGRAPH)) {
                     Paragraph para = (Paragraph) srcNode;
-                    if (para.isEndOfSection() && !para.hasChildNodes())
+
+                    if (para.isEndOfSection() && !para.hasChildNodes()) {
                         continue;
+                    }
                 }
 
                 // This creates a clone of the node, suitable for insertion into the destination document.
                 Node newNode = importer.importNode(srcNode, true);
 
                 // Insert new node after the reference node.
-                dstStory.appendChild(newNode);
+                dstStory.insertAfter(newNode, insertAfterNode.getNextSibling());
                 insertAfterNode = newNode;
             }
         }
