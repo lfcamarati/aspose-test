@@ -11,13 +11,12 @@ class InsertDocumentAtReplaceTextHandler implements IReplacingCallback {
     }
 
     public int replacing(ReplacingArgs e) throws Exception {
-        Document subDoc = documento.getDocument();
+        Document srcDoc = documento.getDocument();
 
         // Insert a document after the paragraph, containing the match text.
         Node matchNode = e.getMatchNode();
         Paragraph para = (Paragraph) matchNode.getParentNode();
-
-        insertDocument(para, subDoc);
+        insertDocument(para, srcDoc);
 
         // Remove the paragraph with the match text.
         para.remove();
@@ -53,7 +52,7 @@ class InsertDocumentAtReplaceTextHandler implements IReplacingCallback {
                 Node newNode = importer.importNode(srcNode, true);
 
                 // Insert new node after the reference node.
-                dstStory.insertAfter(newNode, insertAfterNode.getNextSibling());
+                dstStory.insertAfter(newNode, insertAfterNode);
                 insertAfterNode = newNode;
             }
         }
