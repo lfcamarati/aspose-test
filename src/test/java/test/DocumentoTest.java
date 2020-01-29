@@ -1,10 +1,9 @@
 package test;
 
 import asposetest.Documento;
-import org.junit.jupiter.api.Test;
-
 import java.net.URL;
 import java.util.Arrays;
+import org.junit.jupiter.api.Test;
 
 public class DocumentoTest {
 
@@ -28,7 +27,8 @@ public class DocumentoTest {
                 .apply();
 
         Documento newDoc = Documento.create(urlTemplate)
-            .replace("<<docA>>", docA)
+            //.replace("<<docA>>", docA)
+            .insertAtBookmark("docA", docA)
             .lineBreak()
             .append(docB)
             .append(docC);

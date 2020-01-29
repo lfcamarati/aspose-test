@@ -1,5 +1,6 @@
 package asposetest;
 
+import java.io.InputStream;
 import java.net.URL;
 
 public interface Documento {
@@ -7,6 +8,10 @@ public interface Documento {
     Documento replace(String tag, String newText) throws Exception;
 
     Documento replace(String tag, Documento documento) throws Exception;
+
+    Documento insertAtBookmark(String bookmarkName, Documento doc) throws Exception;
+
+    Documento insertAtBookmark(String bookmarkName, Documento doc, boolean removeBookmarkContent) throws Exception;
 
     Documento append(Documento documento);
 
@@ -23,10 +28,10 @@ public interface Documento {
     }
 
     static Documento create(URL fullPath) throws Exception {
-        return create(fullPath.getPath());
+        return create(fullPath.openStream());
     }
 
-    static Documento create(String fullPath) throws Exception {
-        return DocumentoFactory.create(fullPath);
+    static Documento create(InputStream stream) throws Exception {
+        return DocumentoFactory.create(stream);
     }
 }

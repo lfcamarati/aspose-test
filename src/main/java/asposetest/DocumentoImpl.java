@@ -1,6 +1,13 @@
 package asposetest;
 
-import com.aspose.words.*;
+import com.aspose.words.Bookmark;
+import com.aspose.words.BreakType;
+import com.aspose.words.Document;
+import com.aspose.words.DocumentBuilder;
+import com.aspose.words.FindReplaceDirection;
+import com.aspose.words.FindReplaceOptions;
+import com.aspose.words.ImportFormatMode;
+import java.io.InputStream;
 
 /**
  * https://docs.aspose.com/display/wordsjava/Find+and+Replace
@@ -18,8 +25,8 @@ class DocumentoImpl implements Documento {
         builder = new DocumentBuilder(document);
     }
 
-    DocumentoImpl(String fullPath) throws Exception {
-        document = new Document(fullPath);
+    DocumentoImpl(InputStream stream) throws Exception {
+        document = new Document(stream);
         builder = new DocumentBuilder(document);
     }
 
@@ -32,11 +39,35 @@ class DocumentoImpl implements Documento {
     @Override
     public Documento replace(String replaceText, Documento doc) throws Exception {
         DocumentoImpl documento = (DocumentoImpl) doc;
-
         FindReplaceOptions findReplaceOptions = getFindReplaceOptions();
         findReplaceOptions.setReplacingCallback(new InsertDocumentAtReplaceTextHandler(documento));
-
         document.getRange().replace(replaceText, "", findReplaceOptions);
+
+        return this;
+    }
+
+    @Override
+    public Documento insertAtBookmark(String bookmarkName, Documento doc) throws Exception {
+        return insertAtBookmark(bookmarkName, doc, true);
+    }
+
+    @Override
+    public Documento insertAtBookmark(String bookmarkName, Documento doc, boolean removeBookmarkContent) throws Exception {
+        DocumentoImpl documento = (DocumentoImpl) doc;
+
+        Bookmark bookmark = getDocument().getRange().getBookmarks().get(bookmarkName);
+
+        if(removeBookmarkContent) {
+            bookmark.setText("");
+        }
+
+        DocumentBuilder builder = getBuilder();
+        builder.moveToBookmark(bookmarkName);
+        bookmark.remove();
+
+        builder.startBookmark(bookmarkName);
+        builder.insertDocument(documento.getDocument(), ImportFormatMode.KEEP_SOURCE_FORMATTING);
+        builder.endBookmark(bookmarkName);
 
         return this;
     }
@@ -44,7 +75,6 @@ class DocumentoImpl implements Documento {
     private static FindReplaceOptions getFindReplaceOptions() {
         FindReplaceOptions findReplaceOptions = new FindReplaceOptions();
         findReplaceOptions.setDirection(FindReplaceDirection.FORWARD);
-        findReplaceOptions.setFindWholeWordsOnly(true);
         findReplaceOptions.setMatchCase(true);
 
         return findReplaceOptions;
