@@ -1,12 +1,7 @@
 package asposetest;
 
-import com.aspose.words.Bookmark;
-import com.aspose.words.BreakType;
-import com.aspose.words.Document;
-import com.aspose.words.DocumentBuilder;
-import com.aspose.words.FindReplaceDirection;
-import com.aspose.words.FindReplaceOptions;
-import com.aspose.words.ImportFormatMode;
+import com.aspose.words.*;
+
 import java.io.InputStream;
 
 /**
@@ -54,15 +49,14 @@ class DocumentoImpl implements Documento {
     @Override
     public Documento insertAtBookmark(String bookmarkName, Documento doc, boolean removeBookmarkContent) throws Exception {
         DocumentoImpl documento = (DocumentoImpl) doc;
-
-        Bookmark bookmark = getDocument().getRange().getBookmarks().get(bookmarkName);
+        Bookmark bookmark = getBookmark(bookmarkName);
 
         if(removeBookmarkContent) {
             bookmark.setText("");
         }
 
         DocumentBuilder builder = getBuilder();
-        builder.moveToBookmark(bookmarkName);
+        builder.moveToBookmark(bookmarkName, true, true);
         bookmark.remove();
 
         builder.startBookmark(bookmarkName);
@@ -86,29 +80,37 @@ class DocumentoImpl implements Documento {
     }
 
     @Override
+    public Documento append(Documento doc, boolean insertLineBreak) {
+        return lineBreak().append(doc);
+    }
+
+    @Override
     public Documento append(Documento doc) {
-        lineBreak();
+        builder.moveToDocumentEnd();
         DocumentoImpl documento = (DocumentoImpl) doc;
         builder.insertDocument(documento.document, ImportFormatMode.KEEP_SOURCE_FORMATTING);
+
         return this;
     }
 
     @Override
     public Documento lineBreak() {
-        builder.moveToDocumentEnd();
         builder.insertBreak(BreakType.LINE_BREAK);
         return this;
     }
 
     @Override
     public String getBookmarkText(String bookmarkName) throws Exception {
-        Bookmark bookmark = document.getRange().getBookmarks().get(bookmarkName);
-        return bookmark.getText();
+        return getBookmark(bookmarkName).getText();
     }
 
     @Override
     public void save(String newPath) throws Exception {
         document.save(newPath);
+    }
+
+    private Bookmark getBookmark(String bookmarkName) throws Exception {
+        return document.getRange().getBookmarks().get(bookmarkName);
     }
 
     public DocumentBuilder getBuilder() {

@@ -13,6 +13,8 @@ public interface Documento {
 
     Documento insertAtBookmark(String bookmarkName, Documento doc, boolean removeBookmarkContent) throws Exception;
 
+    Documento append(Documento doc, boolean insertLineBreak);
+
     Documento append(Documento documento);
 
     Dataset dataset();
@@ -23,15 +25,15 @@ public interface Documento {
 
     void save(String newPath) throws Exception;
 
-    static Documento create() throws Exception {
+    static Documento createEmpty() throws Exception {
         return DocumentoFactory.create();
     }
 
-    static Documento create(URL fullPath) throws Exception {
-        return create(fullPath.openStream());
+    static Documento fromUrl(URL fullPath) throws Exception {
+        return fromStream(fullPath.openStream());
     }
 
-    static Documento create(InputStream stream) throws Exception {
+    static Documento fromStream(InputStream stream) throws Exception {
         return DocumentoFactory.create(stream);
     }
 }

@@ -1,9 +1,10 @@
 package test;
 
 import asposetest.Documento;
+import org.junit.jupiter.api.Test;
+
 import java.net.URL;
 import java.util.Arrays;
-import org.junit.jupiter.api.Test;
 
 public class DocumentoTest {
 
@@ -14,23 +15,21 @@ public class DocumentoTest {
         URL urlDocB = this.getClass().getResource("/b.docx");
         URL urlDocC = this.getClass().getResource("/c.docx");
 
-        Documento docA = Documento.create(urlDocA)
+        Documento docA = Documento.fromUrl(urlDocA)
             .replace("<<texto>>", "Texto do capítulo A");
 
-        Documento docB = Documento.create(urlDocB)
+        Documento docB = Documento.fromUrl(urlDocB)
             .replace("<<texto>>", "Texto do capítulo B");
 
-        Documento docC = Documento.create(urlDocC)
+        Documento docC = Documento.fromUrl(urlDocC)
             .dataset()
                 .add("ds", Arrays.asList("qqq", "www", "eee"))
                 .add("ds2", Arrays.asList("zzz", "xxx", "ccc"))
                 .apply();
 
-        Documento newDoc = Documento.create(urlTemplate)
-            //.replace("<<docA>>", docA)
+        Documento newDoc = Documento.fromUrl(urlTemplate)
             .insertAtBookmark("docA", docA)
-            .lineBreak()
-            .append(docB)
+            .replace("<<docB>>", docB)
             .append(docC);
 
         String path = this.getClass().getResource("/").getPath();
