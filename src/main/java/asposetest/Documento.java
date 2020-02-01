@@ -32,10 +32,14 @@ public interface Documento {
     }
 
     static Documento fromUrl(URL fullPath) throws Exception {
-        return fromStream(fullPath.openStream());
+        return fromInputStream(fullPath.openStream());
     }
 
-    static Documento fromStream(InputStream stream) throws Exception {
+    static Documento fromStringBase64(String contentBase64) throws Exception {
+        return DocumentoFactory.fromBase64String(contentBase64);
+    }
+
+    static Documento fromInputStream(InputStream stream) throws Exception {
         return DocumentoFactory.create(stream);
     }
 }
