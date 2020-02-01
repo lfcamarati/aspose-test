@@ -64,7 +64,7 @@ class DocumentoImpl implements Documento {
         }
 
         DocumentBuilder builder = getBuilder();
-        builder.moveToBookmark(bookmarkName, true, true);
+        builder.moveToBookmark(bookmarkName, false, false);
         bookmark.remove();
 
         builder.startBookmark(bookmarkName);

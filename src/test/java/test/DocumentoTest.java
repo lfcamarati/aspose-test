@@ -1,6 +1,7 @@
 package test;
 
 import asposetest.Documento;
+import asposetest.KeyValueReplace;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;
@@ -16,7 +17,10 @@ public class DocumentoTest {
         URL urlDocC = this.getClass().getResource("/c.docx");
 
         Documento docA = Documento.fromUrl(urlDocA)
-            .replace("<<texto>>", "Texto do capítulo A");
+             .replace(new KeyValueReplace()
+                  .add("<<textoA>>", "Texto A do capítulo A")
+                  .add("<<textoB>>", "Texto B do capítulo A")
+                  .add("<<textoC>>", "Texto C do capítulo A"));
 
         Documento docB = Documento.fromUrl(urlDocB)
             .replace("<<texto>>", "Texto do capítulo B");
