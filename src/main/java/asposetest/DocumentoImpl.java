@@ -3,6 +3,7 @@ package asposetest;
 import com.aspose.words.*;
 
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * https://docs.aspose.com/display/wordsjava/Find+and+Replace
@@ -32,11 +33,18 @@ class DocumentoImpl implements Documento {
     }
 
     @Override
+    public Documento replace(KeyValueReplace keyValueReplace) throws Exception {
+        for(Map.Entry<String, String> entry : keyValueReplace.getValues().entrySet()) {
+            replace(entry.getKey(), entry.getValue());
+        }
+
+        return this;
+    }
+
+    @Override
     public Documento replace(String replaceText, Documento doc) throws Exception {
         DocumentoImpl documento = (DocumentoImpl) doc;
-        FindReplaceOptions findReplaceOptions = getFindReplaceOptions();
-        findReplaceOptions.setReplacingCallback(new InsertDocumentAtReplaceTextHandler(documento));
-        document.getRange().replace(replaceText, "", findReplaceOptions);
+        document.getRange().replace(replaceText, "", getFindReplaceOptions(new InsertDocumentAtReplaceTextHandler(documento)));
 
         return this;
     }
@@ -64,6 +72,13 @@ class DocumentoImpl implements Documento {
         builder.endBookmark(bookmarkName);
 
         return this;
+    }
+
+    private static FindReplaceOptions getFindReplaceOptions(IReplacingCallback callback) {
+        FindReplaceOptions findReplaceOptions = getFindReplaceOptions();
+        findReplaceOptions.setReplacingCallback(callback);
+
+        return findReplaceOptions;
     }
 
     private static FindReplaceOptions getFindReplaceOptions() {

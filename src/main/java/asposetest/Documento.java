@@ -7,6 +7,8 @@ public interface Documento {
 
     Documento replace(String tag, String newText) throws Exception;
 
+    Documento replace(KeyValueReplace keyValueReplace) throws Exception;
+
     Documento replace(String tag, Documento documento) throws Exception;
 
     Documento insertAtBookmark(String bookmarkName, Documento doc) throws Exception;
