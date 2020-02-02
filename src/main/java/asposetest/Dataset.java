@@ -1,10 +1,10 @@
 package asposetest;
 
-import java.util.Collection;
+import java.util.List;
 
 public interface Dataset {
 
-    Dataset add(String dsName, Collection<String> list);
+    Dataset add(String dsName, List<String> list);
 
     Documento apply() throws Exception;
 }

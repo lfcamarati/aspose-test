@@ -3,6 +3,7 @@ package asposetest;
 import com.aspose.words.*;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,6 +37,14 @@ class DocumentoImpl implements Documento {
     public Documento replace(KeyValueReplace keyValueReplace) throws Exception {
         for(Map.Entry<String, String> entry : keyValueReplace.getValues().entrySet()) {
             replace(entry.getKey(), entry.getValue());
+        }
+
+        if (keyValueReplace.hasDatasetValues()) {
+            final Dataset dataset = dataset();
+
+            for (Map.Entry<String, List<String>> entry : keyValueReplace.getDatasetValues().entrySet()) {
+                dataset.add(entry.getKey(), entry.getValue());
+            }
         }
 
         return this;

@@ -3,7 +3,6 @@ package asposetest;
 import com.aspose.words.ReportingEngine;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 class DatasetImpl implements Dataset {
@@ -16,7 +15,7 @@ class DatasetImpl implements Dataset {
         this.documento = documento;
     }
 
-    public DatasetImpl add(String dsName, Collection<String> list) {
+    public DatasetImpl add(String dsName, List<String> list) {
         dataSources.add(list);
         dataSourcesNames.add(dsName);
 
