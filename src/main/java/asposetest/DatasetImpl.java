@@ -7,11 +7,11 @@ import java.util.List;
 
 class DatasetImpl implements Dataset {
 
-    private final DocumentoImpl documento;
+    private final DocxImpl documento;
     private List<Object> dataSources = new ArrayList<>();
     private List<String> dataSourcesNames = new ArrayList<>();
 
-    public DatasetImpl(DocumentoImpl documento) {
+    public DatasetImpl(DocxImpl documento) {
         this.documento = documento;
     }
 
@@ -22,7 +22,7 @@ class DatasetImpl implements Dataset {
         return this;
     }
 
-    public Documento apply() throws Exception {
+    public Docx apply() throws Exception {
         String[] arrayDataSourcesNames = dataSourcesNames.toArray(new String[0]);
 
         ReportingEngine engine = new ReportingEngine();

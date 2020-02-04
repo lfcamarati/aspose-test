@@ -14,8 +14,8 @@ public class KeyValueReplace {
         this.datasetValues = new HashMap<>();
     }
 
-    public KeyValueReplace add(String text, String newText) {
-        values.put(text, newText);
+    public KeyValueReplace add(String tag, String newText) {
+        values.put(tag, newText);
         return this;
     }
 

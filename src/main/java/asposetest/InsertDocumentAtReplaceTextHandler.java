@@ -4,9 +4,9 @@ import com.aspose.words.*;
 
 class InsertDocumentAtReplaceTextHandler implements IReplacingCallback {
 
-    private final DocumentoImpl documento;
+    private final DocxImpl documento;
 
-    InsertDocumentAtReplaceTextHandler(DocumentoImpl documento) {
+    InsertDocumentAtReplaceTextHandler(DocxImpl documento) {
         this.documento = documento;
     }
 
