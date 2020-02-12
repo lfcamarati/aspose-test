@@ -6,5 +6,5 @@ public interface Dataset {
 
     Dataset add(String dsName, List<String> list);
 
-    Docx apply() throws Exception;
+    Docx apply();
 }

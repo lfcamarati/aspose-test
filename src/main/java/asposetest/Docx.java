@@ -1,16 +1,30 @@
 package asposetest;
 
+import java.util.function.Supplier;
+
 public interface Docx {
 
-    Docx replace(String tag, String newText) throws Exception;
+    Docx replace(String tag, String newText);
 
-    Docx replace(KeyValueReplace keyValueReplace) throws Exception;
+    Docx replace(String tag, Supplier<String> fnNewText);
 
-    Docx replace(String tag, Docx docx) throws Exception;
+    Docx clear(String tag);
 
-    Docx insertAtBookmark(String bookmarkName, Docx doc) throws Exception;
+    Docx replace(KeyValueReplace keyValueReplace);
 
-    Docx insertAtBookmark(String bookmarkName, Docx doc, boolean removeBookmarkContent) throws Exception;
+    Docx replace(String tag, Docx docx);
+
+    Docx remove(String tag);
+
+    Docx insertAtBookmark(String bookmarkName, Docx doc);
+
+    Docx insertAtBookmark(String bookmarkName, Docx doc, boolean removeBookmarkContent);
+
+    Docx removeBookmark(String bookmarkName);
+
+    Docx removeBookmark(String bookmarkName, boolean removeBookmarkContent);
+
+    Docx removeAllBookmarks();
 
     Docx append(Docx doc, boolean insertLineBreak);
 
@@ -18,11 +32,13 @@ public interface Docx {
 
     Docx append(Docx docx);
 
-    Dataset dataset();
-
     Docx lineBreak();
 
-    Docx paragraph();
+    Dataset dataset();
 
-    void save(String newPath) throws Exception;
+    PageSetup pageSetup();
+
+    byte[] toByteArray();
+
+    String getBookmarkText(String bookmarkName);
 }

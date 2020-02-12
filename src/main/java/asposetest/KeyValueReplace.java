@@ -3,6 +3,7 @@ package asposetest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class KeyValueReplace {
 
@@ -12,6 +13,14 @@ public class KeyValueReplace {
     public KeyValueReplace() {
         this.values = new HashMap<>();
         this.datasetValues = new HashMap<>();
+    }
+
+    public KeyValueReplace addIf(String tag, String newText, Supplier<Boolean> fn) {
+        if (fn != null && fn.get()) {
+            return add(tag, newText);
+        }
+
+        return this;
     }
 
     public KeyValueReplace add(String tag, String newText) {

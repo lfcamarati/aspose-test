@@ -1,18 +1,18 @@
 package asposetest;
 
 import com.aspose.words.ReportingEngine;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 class DatasetImpl implements Dataset {
 
-    private final DocxImpl documento;
-    private List<Object> dataSources = new ArrayList<>();
-    private List<String> dataSourcesNames = new ArrayList<>();
+    private final DocxInternal docxInternal;
+    private final List<Object> dataSources = new ArrayList<>();
+    private final List<String> dataSourcesNames = new ArrayList<>();
 
-    public DatasetImpl(DocxImpl documento) {
-        this.documento = documento;
+    public DatasetImpl(DocxInternal docxInternal) {
+        this.docxInternal = docxInternal;
     }
 
     public DatasetImpl add(String dsName, List<String> list) {
@@ -22,12 +22,15 @@ class DatasetImpl implements Dataset {
         return this;
     }
 
-    public Docx apply() throws Exception {
+    public Docx apply() {
         String[] arrayDataSourcesNames = dataSourcesNames.toArray(new String[0]);
 
-        ReportingEngine engine = new ReportingEngine();
-        engine.buildReport(documento.getDocument(), dataSources.toArray(), arrayDataSourcesNames);
-
-        return documento;
+        try {
+            ReportingEngine engine = new ReportingEngine();
+            engine.buildReport(docxInternal.getDocument(), dataSources.toArray(), arrayDataSourcesNames);
+            return docxInternal.getDocx();
+        } catch (Exception e) {
+            throw new DocxException("Erro ao aplicar datasets ["+ Arrays.toString(arrayDataSourcesNames) +"]", e);
+        }
     }
 }

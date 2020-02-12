@@ -1,49 +1,82 @@
 package asposetest;
 
 import com.aspose.words.Bookmark;
+import com.aspose.words.BookmarkCollection;
 import com.aspose.words.BreakType;
+import com.aspose.words.CompositeNode;
 import com.aspose.words.Document;
 import com.aspose.words.DocumentBuilder;
 import com.aspose.words.FindReplaceDirection;
 import com.aspose.words.FindReplaceOptions;
 import com.aspose.words.IReplacingCallback;
 import com.aspose.words.ImportFormatMode;
+import com.aspose.words.SaveFormat;
+import com.aspose.words.SaveOptions;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Supplier;
 
-/**
- * https://docs.aspose.com/display/wordsjava/Find+and+Replace
- * https://docs.aspose.com/display/wordsjava/How+to++Insert+a+Document+into+another+Document
- * https://docs.aspose.com/display/wordsjava/Use+DocumentBuilder+to+Insert+Document+Elements
- */
+class DocxImpl implements Docx, DocxInternal {
 
-class DocxImpl implements Docx {
+    private static final String EMPTY = "";
 
     private Document document;
     private DocumentBuilder builder;
+    private PageSetup pageSetup;
     private TagResolver tagResolver;
 
-    DocxImpl() throws Exception {
-        document = new Document();
-        builder = new DocumentBuilder(document);
+    DocxImpl() {
+        init(null, null);
     }
 
-    DocxImpl(InputStream stream, TagResolver tagResolver) throws Exception {
-        document = new Document(stream);
-        builder = new DocumentBuilder(document);
-        this.tagResolver = tagResolver;
+    DocxImpl(InputStream stream, TagResolver tagResolver) {
+        init(stream, tagResolver);
+        initPageSetup();
+    }
+
+    private void init(InputStream stream, TagResolver tagResolver) {
+        try {
+            this.document = (stream == null) ? new Document() : new Document(stream);
+            this.builder = new DocumentBuilder(document);
+            this.tagResolver = tagResolver;
+            initPageSetup();
+        } catch(Exception ex) {
+            throw new DocxException(ex);
+        }
+    }
+
+    private void initPageSetup() {
+        this.pageSetup = new PageSetupImpl(this);
     }
 
     @Override
-    public Docx replace(String tag, String newText) throws Exception {
-        document.getRange().replace(resolveTag(tag), newText, getFindReplaceOptions());
-        return this;
+    public Docx replace(String tag, String newText) {
+        try {
+            document.getRange().replace(resolveTag(tag), newText, getFindReplaceOptions());
+            return this;
+        } catch (Exception ex) {
+            throw new DocxException("Erro ao substituir tag [tag=" + tag + ", newText=" + newText + "]", ex);
+        }
     }
 
     @Override
-    public Docx replace(KeyValueReplace keyValueReplace) throws Exception {
+    public Docx replace(String tag, Supplier<String> fnNewText) {
+        return replace(tag, fnNewText.get());
+    }
+
+    @Override
+    public Docx clear(String tag) {
+        return replace(tag, EMPTY);
+    }
+
+    @Override
+    public Docx replace(KeyValueReplace keyValueReplace) {
         for(Map.Entry<String, String> entry : keyValueReplace.getValues().entrySet()) {
             replace(entry.getKey(), entry.getValue());
         }
@@ -60,36 +93,97 @@ class DocxImpl implements Docx {
     }
 
     @Override
-    public Docx replace(String tag, Docx doc) throws Exception {
-        DocxImpl documento = (DocxImpl) doc;
-        document.getRange().replace(resolveTag(tag), "", getFindReplaceOptions(new InsertDocumentAtReplaceTextHandler(documento)));
-
-        return this;
+    public Docx replace(String tag, Docx doc) {
+        try {
+            DocxImpl documento = (DocxImpl) doc;
+            document.getRange().replace(resolveTag(tag), EMPTY, getFindReplaceOptions(new InsertDocumentAtReplaceTextHandler(documento)));
+            return this;
+        } catch (Exception ex) {
+            throw new DocxException("Erro ao substituir tag [tag=" + tag + "]", ex);
+        }
     }
 
     @Override
-    public Docx insertAtBookmark(String bookmarkName, Docx doc) throws Exception {
+    public Docx remove(String tag) {
+        try {
+            document.getRange().replace(resolveTag(tag), EMPTY, getFindReplaceOptions(new RemoveNodeHandler()));
+            return this;
+        } catch (Exception ex) {
+            throw new DocxException("Erro ao remover tag [tag=" + tag + "]", ex);
+        }
+    }
+
+    @Override
+    public Docx insertAtBookmark(String bookmarkName, Docx doc) {
         return insertAtBookmark(bookmarkName, doc, true);
     }
 
     @Override
-    public Docx insertAtBookmark(String bookmarkName, Docx doc, boolean removeBookmarkContent) throws Exception {
-        DocxImpl documento = (DocxImpl) doc;
-        Bookmark bookmark = getBookmark(bookmarkName);
+    public Docx insertAtBookmark(String bookmarkName, Docx doc, boolean removeBookmarkContent) {
+        try {
+            DocxImpl documento = (DocxImpl) doc;
+            Bookmark bookmark = getBookmark(bookmarkName);
 
-        if(removeBookmarkContent) {
-            bookmark.setText("");
+            if(removeBookmarkContent) {
+                bookmark.setText(EMPTY);
+            }
+
+            DocumentBuilder builder = getBuilder();
+            builder.moveToBookmark(bookmarkName, false, false);
+            bookmark.remove();
+
+            builder.startBookmark(bookmarkName);
+            builder.insertDocument(documento.getDocument(), ImportFormatMode.KEEP_SOURCE_FORMATTING);
+            builder.endBookmark(bookmarkName);
+
+            return this;
+        } catch (Exception ex) {
+            throw new DocxException("Erro ao inserir conteúdo em bookmark [bookmarkName=" + bookmarkName + "]", ex);
         }
+    }
 
-        DocumentBuilder builder = getBuilder();
-        builder.moveToBookmark(bookmarkName, false, false);
-        bookmark.remove();
+    @Override
+    public Docx removeBookmark(String bookmarkName) {
+        return removeBookmark(bookmarkName, false);
+    }
 
-        builder.startBookmark(bookmarkName);
-        builder.insertDocument(documento.getDocument(), ImportFormatMode.KEEP_SOURCE_FORMATTING);
-        builder.endBookmark(bookmarkName);
+    @Override
+    public Docx removeBookmark(String bookmarkName, boolean removeBookmarkContent) {
+        try {
+            Bookmark bookmark = getBookmark(bookmarkName);
+            CompositeNode parentNode = bookmark.getBookmarkStart().getParentNode();
 
-        return this;
+            if (removeBookmarkContent) {
+                bookmark.setText(EMPTY);
+            }
+
+            bookmark.remove();
+
+            if (removeBookmarkContent) {
+                parentNode.removeAllChildren();
+                parentNode.remove();
+            }
+
+            return this;
+        } catch (Exception ex) {
+            throw new DocxException("Erro ao remover bookmark [bookmarkName=" + bookmarkName + "]", ex);
+        }
+    }
+
+    @Override
+    public Docx removeAllBookmarks() {
+        try {
+            BookmarkCollection bookmarks = document.getRange().getBookmarks();
+            Iterator<Bookmark> iterator = bookmarks.iterator();
+
+            while (iterator.hasNext()) {
+                removeBookmark(iterator.next().getName());
+            }
+
+            return null;
+        } catch (Exception ex) {
+            throw new DocxException("Erro ao remover bookmarks", ex);
+        }
     }
 
     private String resolveTag(String tag) {
@@ -148,26 +242,60 @@ class DocxImpl implements Docx {
     }
 
     @Override
-    public Docx paragraph() {
-        builder.moveToDocumentEnd();
-        builder.insertBreak(BreakType.PARAGRAPH_BREAK);
-        return this;
+    public PageSetup pageSetup() {
+        return pageSetup;
     }
 
     @Override
-    public void save(String newPath) throws Exception {
-        document.save(newPath);
+    public byte[] toByteArray() {
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            SaveOptions s = SaveOptions.createSaveOptions(SaveFormat.DOCX);
+            document.getBuiltInDocumentProperties().clear();
+            document.getCustomDocumentProperties().clear();
+            document.save(outputStream, s);
+
+            return outputStream.toByteArray();
+        } catch (Exception e) {
+            throw new DocxException("Erro ao salvar docx", e);
+        }
     }
 
-    private Bookmark getBookmark(String bookmarkName) throws Exception {
-        return document.getRange().getBookmarks().get(bookmarkName);
+    @Override
+    public String getBookmarkText(String bookmarkName) {
+        try {
+            Optional<Bookmark> bookmark = Optional.ofNullable(getBookmark(bookmarkName));
+
+            if (bookmark.isPresent()) {
+                byte[] bytes = bookmark.get().getText().getBytes(StandardCharsets.UTF_8);
+                return new String(bytes, StandardCharsets.UTF_8);
+            }
+
+            return null;
+        } catch (Exception ex) {
+            throw new DocxException("Erro ao obter texto de bookmark [bookmarkName=" + bookmarkName + "]", ex);
+        }
     }
 
+    private Bookmark getBookmark(String bookmarkName) {
+        try {
+            return document.getRange().getBookmarks().get(bookmarkName);
+        } catch (Exception ex) {
+            throw new DocxException("Erro ao obter bookmark [bookmarkName=" + bookmarkName + "]", ex);
+        }
+    }
+
+    @Override
     public DocumentBuilder getBuilder() {
         return builder;
     }
 
+    @Override
     public Document getDocument() {
         return document;
+    }
+
+    @Override
+    public Docx getDocx() {
+        return this;
     }
 }
