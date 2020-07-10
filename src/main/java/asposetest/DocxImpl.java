@@ -1,25 +1,12 @@
 package asposetest;
 
-import com.aspose.words.Bookmark;
-import com.aspose.words.BookmarkCollection;
-import com.aspose.words.BreakType;
-import com.aspose.words.CompositeNode;
-import com.aspose.words.Document;
-import com.aspose.words.DocumentBuilder;
-import com.aspose.words.FindReplaceDirection;
-import com.aspose.words.FindReplaceOptions;
-import com.aspose.words.IReplacingCallback;
-import com.aspose.words.ImportFormatMode;
-import com.aspose.words.SaveFormat;
-import com.aspose.words.SaveOptions;
+import com.aspose.words.*;
+
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 class DocxImpl implements Docx, DocxInternal {
@@ -274,6 +261,24 @@ class DocxImpl implements Docx, DocxInternal {
         } catch (Exception ex) {
             throw new DocxException("Erro ao obter texto de bookmark [bookmarkName=" + bookmarkName + "]", ex);
         }
+    }
+
+    @Override
+    public List<String> getAllParagraphsTexts() {
+        NodeCollection paragraphs = document.getChildNodes(NodeType.PARAGRAPH, true);
+        List<String> texts = new ArrayList<>();
+
+        for (int parIdx = 0; parIdx < paragraphs.getCount(); parIdx++) {
+            Paragraph par = (Paragraph) paragraphs.get(parIdx);
+
+            if (par.getAncestor(NodeType.TABLE) != null) {
+                continue;
+            }
+
+            texts.add(par.getText());
+        }
+
+        return texts;
     }
 
     private Bookmark getBookmark(String bookmarkName) {
