@@ -1,5 +1,6 @@
 package asposetest;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 public interface Docx {
@@ -41,4 +42,6 @@ public interface Docx {
     byte[] toByteArray();
 
     String getBookmarkText(String bookmarkName);
+
+    List<String> getAllParagraphsTexts();
 }

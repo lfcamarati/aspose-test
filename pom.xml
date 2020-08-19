@@ -15,8 +15,9 @@
 
     <repositories>
         <repository>
-            <id>aspose</id>
-            <url>https://artifact.aspose.com/repo/</url>
+            <id>AsposeJavaAPI</id>
+            <name>Aspose Java API</name>
+            <url>https://repository.aspose.com/repo/</url>
         </repository>
     </repositories>
 
@@ -30,8 +31,8 @@
         <dependency>
             <groupId>com.aspose</groupId>
             <artifactId>aspose-words</artifactId>
-            <version>18.2</version>
-            <classifier>jdk16</classifier>
+            <version>20.3</version>
+            <classifier>jdk17</classifier>
         </dependency>
     </dependencies>
 </project>
